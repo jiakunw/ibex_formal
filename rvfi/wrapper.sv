@@ -149,14 +149,14 @@ module rvfi_wrapper (
         .RV32B            (ibex_pkg::RV32BNone),
         .RV32ZC           (ibex_pkg::RV32Zca),
         .RegFile          (ibex_pkg::RegFileFF),
-        .BranchTargetALU  (1'b0),
-        .WritebackStage   (1'b0),
-        .ICache           (1'b0),
-        .ICacheECC        (1'b0),
-        .ICacheScramble   (1'b0),
-        .BranchPredictor  (1'b0),
-        .DbgTriggerEn     (1'b0),
-        .SecureIbex       (1'b0)
+        .BranchTargetALU  (1'b1),
+        .WritebackStage   (1'b1),
+        .ICache           (1'b1),
+        .ICacheECC        (1'b1),
+        .ICacheScramble   (1'b1),
+        .BranchPredictor  (1'b1),
+        .DbgTriggerEn     (1'b1),
+        .SecureIbex       (1'b1)
     ) u_ibex_top (
         // Clock and reset
         .clk_i                  (clock),
