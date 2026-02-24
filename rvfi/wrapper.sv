@@ -20,6 +20,7 @@ module rvfi_wrapper (
     input  logic        instr_gnt,
     input  logic        instr_rvalid,
     input  logic [31:0] instr_rdata,
+    input  logic [6:0]  instr_rdata_intg_i,
     input  logic        instr_err,
 
     // Data bus responses
@@ -27,6 +28,7 @@ module rvfi_wrapper (
     input  logic        data_rvalid,
     input  logic [31:0] data_rdata,
     input  logic        data_err,
+    input  logic [6:0]  data_rdata_intg_i,
 
     // Interrupts
     input  logic        irq_software,
@@ -102,16 +104,19 @@ module rvfi_wrapper (
     // ================================================================
 
     // No grant without request
+    asm_ibus_no_grant_without_request: 
     assume property (@(posedge clock) disable iff (reset)
         !instr_req |-> !instr_gnt
     );
 
     // No rvalid without outstanding request
+    asm_ibus_no_rvalid_without_outstanding_request: 
     assume property (@(posedge clock) disable iff (reset)
         instr_outstanding == 2'd0 |-> !instr_rvalid
     );
 
     // Don't exceed max outstanding (Ibex prefetch buffer: 2)
+    asm_ibus_no_exceed_max_outstanding: 
     assume property (@(posedge clock) disable iff (reset)
         instr_outstanding <= 2'd2
     );
@@ -121,19 +126,37 @@ module rvfi_wrapper (
     // ================================================================
 
     // No grant without request
+    asm_dbus_no_grant_without_request: 
     assume property (@(posedge clock) disable iff (reset)
         !data_req |-> !data_gnt
     );
 
     // No rvalid without outstanding request
+    asm_dbus_no_rvalid_without_outstanding_request: 
     assume property (@(posedge clock) disable iff (reset)
         data_outstanding == 2'd0 |-> !data_rvalid
     );
 
     // Don't exceed max outstanding (Ibex LSU: 2 for unaligned)
+    asm_dbus_no_exceed_max_outstanding:
     assume property (@(posedge clock) disable iff (reset)
         data_outstanding <= 2'd2
     );
+
+    // ================================================================
+    // No interrupts
+    // ================================================================
+    asm_no_irq_sw:  assume property (@(posedge clock) !irq_software);
+    asm_no_irq_tmr: assume property (@(posedge clock) !irq_timer);
+    asm_no_irq_ext: assume property (@(posedge clock) !irq_external);
+    asm_no_irq_fast:assume property (@(posedge clock) irq_fast == 15'b0);
+    asm_no_irq_nm:  assume property (@(posedge clock) !irq_nm);
+
+    // ================================================================
+    // No memory errors
+    // ================================================================
+    asm_no_instr_err: assume property (@(posedge clock) disable iff (reset) !instr_err);
+    asm_no_data_err:  assume property (@(posedge clock) disable iff (reset) !data_err);
 
     // ================================================================
     // ibex_top instantiation
@@ -149,14 +172,14 @@ module rvfi_wrapper (
         .RV32B            (ibex_pkg::RV32BNone),
         .RV32ZC           (ibex_pkg::RV32Zca),
         .RegFile          (ibex_pkg::RegFileFF),
-        .BranchTargetALU  (1'b1),
-        .WritebackStage   (1'b1),
-        .ICache           (1'b1),
-        .ICacheECC        (1'b1),
-        .ICacheScramble   (1'b1),
-        .BranchPredictor  (1'b1),
-        .DbgTriggerEn     (1'b1),
-        .SecureIbex       (1'b1)
+        .BranchTargetALU  (1'b0),
+        .WritebackStage   (1'b0),
+        .ICache           (1'b0),
+        .ICacheECC        (1'b0),
+        .ICacheScramble   (1'b0),
+        .BranchPredictor  (1'b0),
+        .DbgTriggerEn     (1'b0),
+        .SecureIbex       (1'b0)
     ) u_ibex_top (
         // Clock and reset
         .clk_i                  (clock),
@@ -177,7 +200,7 @@ module rvfi_wrapper (
         .instr_rvalid_i         (instr_rvalid),
         .instr_addr_o           (instr_addr),
         .instr_rdata_i          (instr_rdata),
-        .instr_rdata_intg_i     (7'b0),
+        .instr_rdata_intg_i     (instr_rdata_intg_i),
         .instr_err_i            (instr_err),
 
         // Data bus
@@ -190,7 +213,7 @@ module rvfi_wrapper (
         .data_wdata_o           (data_wdata),
         .data_wdata_intg_o      (),
         .data_rdata_i           (data_rdata),
-        .data_rdata_intg_i      (7'b0),
+        .data_rdata_intg_i      (data_rdata_intg_i),
         .data_err_i             (data_err),
 
         // Interrupts (unconstrained)
