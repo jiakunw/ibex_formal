@@ -61,22 +61,23 @@ module rvfi_wrapper (
     output logic [31:0] rvfi_mem_wdata
 );
 
-    logic [31:0] instr_rdata_raw;    // 你的 bus tracker 给的 32 位数据
-    logic [38:0] instr_rdata_ecc;    // 编码后 39 位
+    // ================================================================
+    // Memory address encoders
+    // ================================================================
+   
+    logic [38:0] instr_rdata_ecc; // encoded instruction mem address  
 
     prim_secded_inv_39_32_enc u_instr_ecc (
-        .data_i (instr_rdata_raw),
+        .data_i (instr_rdata),
         .data_o (instr_rdata_ecc)
     );
 
-    logic [31:0] data_rdata_raw;
-    logic [38:0] data_rdata_ecc;
+    logic [38:0] data_rdata_ecc;  // encoded data mem address  
 
     prim_secded_inv_39_32_enc u_data_ecc (
-        .data_i (data_rdata_raw),
+        .data_i (data_rdata),
         .data_o (data_rdata_ecc)
     );
-
 
     // ================================================================
     // CPU output signals (driven by ibex_top)
