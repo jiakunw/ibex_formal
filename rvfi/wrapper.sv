@@ -20,7 +20,6 @@ module rvfi_wrapper (
     input  logic        instr_gnt,
     input  logic        instr_rvalid,
     input  logic [31:0] instr_rdata,
-    input  logic [6:0]  instr_rdata_intg_i,
     input  logic        instr_err,
 
     // Data bus responses
@@ -28,7 +27,6 @@ module rvfi_wrapper (
     input  logic        data_rvalid,
     input  logic [31:0] data_rdata,
     input  logic        data_err,
-    input  logic [6:0]  data_rdata_intg_i,
 
     // Interrupts
     input  logic        irq_software,
@@ -62,6 +60,23 @@ module rvfi_wrapper (
     output logic [31:0] rvfi_mem_rdata,
     output logic [31:0] rvfi_mem_wdata
 );
+
+    logic [31:0] instr_rdata_raw;    // 你的 bus tracker 给的 32 位数据
+    logic [38:0] instr_rdata_ecc;    // 编码后 39 位
+
+    prim_secded_inv_39_32_enc u_instr_ecc (
+        .data_i (instr_rdata_raw),
+        .data_o (instr_rdata_ecc)
+    );
+
+    logic [31:0] data_rdata_raw;
+    logic [38:0] data_rdata_ecc;
+
+    prim_secded_inv_39_32_enc u_data_ecc (
+        .data_i (data_rdata_raw),
+        .data_o (data_rdata_ecc)
+    );
+
 
     // ================================================================
     // CPU output signals (driven by ibex_top)
@@ -179,7 +194,7 @@ module rvfi_wrapper (
         .ICacheScramble   (1'b0),
         .BranchPredictor  (1'b0),
         .DbgTriggerEn     (1'b0),
-        .SecureIbex       (1'b0)
+        .SecureIbex       (1'b1)
     ) u_ibex_top (
         // Clock and reset
         .clk_i                  (clock),
@@ -199,8 +214,8 @@ module rvfi_wrapper (
         .instr_gnt_i            (instr_gnt),
         .instr_rvalid_i         (instr_rvalid),
         .instr_addr_o           (instr_addr),
-        .instr_rdata_i          (instr_rdata),
-        .instr_rdata_intg_i     (instr_rdata_intg_i),
+        .instr_rdata_i          (instr_rdata_ecc[31:0]),
+        .instr_rdata_intg_i     (instr_rdata_ecc[38:32]),
         .instr_err_i            (instr_err),
 
         // Data bus
@@ -212,8 +227,8 @@ module rvfi_wrapper (
         .data_addr_o            (data_addr),
         .data_wdata_o           (data_wdata),
         .data_wdata_intg_o      (),
-        .data_rdata_i           (data_rdata),
-        .data_rdata_intg_i      (data_rdata_intg_i),
+        .data_rdata_i           (data_rdata_ecc[31:0]),
+        .data_rdata_intg_i      (data_rdata_ecc[38:32]),
         .data_err_i             (data_err),
 
         // Interrupts (unconstrained)

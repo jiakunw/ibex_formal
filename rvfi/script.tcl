@@ -101,7 +101,9 @@ analyze -verilog {*}${DEFINES} {*}${INCDIR} \
     ${INSNS_PATH}/insn_add.v
     
 analyze -sv09 {*}${DEFINES} {*}${INCDIR} \
-    ${CHECKS_PATH}/rvfi_insn_check.sv
+    ${CHECKS_PATH}/rvfi_insn_check.sv \
+    ${CHECKS_PATH}/rvfi_dmem_check.sv \
+    ${CHECKS_PATH}/rvfi_imem_check.sv
 
 # 5. Wrapper and testbench
 analyze -sv09 {*}${DEFINES} {*}${INCDIR} \
@@ -126,8 +128,8 @@ reset reset
 # ============================================================
 
 get_design_info
-
 set_prove_time_limit 300s
+
 prove -all
 
 # ============================================================
