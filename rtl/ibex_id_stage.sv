@@ -1028,7 +1028,7 @@ module ibex_id_stage #(
     assign instr_executing_spec = instr_valid_i & ~instr_fetch_err_i & controller_run;
     assign instr_executing = instr_executing_spec;
 
-    `ASSERT(IbexStallIfValidInstrNotExecuting,
+    `ASSERT(,
       instr_valid_i & ~instr_fetch_err_i & ~instr_executing & controller_run |-> stall_id)
 
     // No data forwarding without writeback stage so always take source register data direct from

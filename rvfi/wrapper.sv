@@ -160,15 +160,6 @@ module rvfi_wrapper (
     );
 
     // ================================================================
-    // No interrupts
-    // ================================================================
-    asm_no_irq_sw:  assume property (@(posedge clock) !irq_software);
-    asm_no_irq_tmr: assume property (@(posedge clock) !irq_timer);
-    asm_no_irq_ext: assume property (@(posedge clock) !irq_external);
-    asm_no_irq_fast:assume property (@(posedge clock) irq_fast == 15'b0);
-    asm_no_irq_nm:  assume property (@(posedge clock) !irq_nm);
-
-    // ================================================================
     // No memory errors
     // ================================================================
     asm_no_instr_err: assume property (@(posedge clock) disable iff (reset) !instr_err);
@@ -190,8 +181,8 @@ module rvfi_wrapper (
         .RegFile          (ibex_pkg::RegFileFF),
         .BranchTargetALU  (1'b0),
         .WritebackStage   (1'b0),
-        .ICache           (1'b0),
-        .ICacheECC        (1'b0),
+        .ICache           (1'b1),
+        .ICacheECC        (1'b1),
         .ICacheScramble   (1'b0),
         .BranchPredictor  (1'b0),
         .DbgTriggerEn     (1'b0),
