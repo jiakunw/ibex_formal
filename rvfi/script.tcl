@@ -20,7 +20,7 @@ set DEFINES [list \
     +define+RISCV_FORMAL_NRET=1 \
     +define+RISCV_FORMAL_XLEN=32 \
     +define+RISCV_FORMAL_ILEN=32 \
-    +define+RISCV_FORMAL_INSN_MODEL=rvfi_insn_add \
+    +define+RISCV_FORMAL_INSN_MODEL=rvfi_insn_INSN_PLACEHOLDER \
 ]
 
 # Include paths (for prim_assert.sv, rvfi_macros.vh, etc.)
@@ -96,9 +96,9 @@ analyze -sv09 {*}${DEFINES} {*}${INCDIR} \
 analyze -sv09 {*}${DEFINES} {*}${INCDIR} \
     ${TARGET_PATH}/rvfi_macros.vh 
 
-# insn_add.v is verilog file not sv
+# insn_INSN_PLACEHOLDER.v is verilog file not sv
 analyze -verilog {*}${DEFINES} {*}${INCDIR} \
-    ${INSNS_PATH}/insn_add.v
+    ${INSNS_PATH}/insn_INSN_PLACEHOLDER.v
     
 analyze -sv09 {*}${DEFINES} {*}${INCDIR} \
     ${CHECKS_PATH}/rvfi_insn_check.sv \
